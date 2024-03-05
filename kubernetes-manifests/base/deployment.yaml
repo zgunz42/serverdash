@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: serverdash
+  labels:
+    app.kubernetes.io/name: serverdash
+spec:
+  selector:
+    matchLabels:
+      app: serverdash
+  template:
+    metadata:
+      labels:
+        app: serverdash
+    spec:
+      terminationGracePeriodSeconds: 5
+      containers:
+        - name: server
+          image: kangmicin/serverdash:0.0.1
+          ports:
+            - containerPort: 3000
+              name: app-port
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi

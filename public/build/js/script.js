@@ -119,7 +119,7 @@ const doughnutChart = new Chart(document.getElementById('doughnutChart'), {
   },
 })
 
-const activeUsersChart = new Chart(document.getElementById('activeUsersChart'), {
+const humChart = new Chart(document.getElementById('activeUsersChart'), {
   type: 'bar',
   data: {
     labels: [],
@@ -138,6 +138,8 @@ const activeUsersChart = new Chart(document.getElementById('activeUsersChart'), 
         {
           display: false,
           gridLines: false,
+          startAtZero: true,
+          beginAtZero: true,
         },
       ],
       xAxes: [
@@ -156,7 +158,7 @@ const activeUsersChart = new Chart(document.getElementById('activeUsersChart'), 
       display: false,
     },
     tooltips: {
-      prefix: 'Users',
+      prefix: 'Humidity: ',
       bodySpacing: 4,
       footerSpacing: 4,
       hasIndicator: true,
@@ -170,7 +172,7 @@ const activeUsersChart = new Chart(document.getElementById('activeUsersChart'), 
   },
 })
 
-const lineChart = new Chart(document.getElementById('lineChart'), {
+const tempChart = new Chart(document.getElementById('lineChart'), {
   type: 'line',
   data: {
     labels: [],
@@ -191,6 +193,8 @@ const lineChart = new Chart(document.getElementById('lineChart'), {
       yAxes: [
         {
           gridLines: false,
+          startAtZero: true,
+          beginAtZero: true,
           ticks: {
             beginAtZero: false,
             stepSize: 50,
@@ -223,15 +227,10 @@ let humValue = 0
 const usersCount = document.getElementById('usersCount')
 const tempCount = document.getElementById('tempCount');
 
-const fakeUsersCount = () => {
-  humValue = random()
-  activeUsersChart.data.datasets[0].data.push(humValue)
-  activeUsersChart.data.datasets[0].data.splice(0, 1)
-  activeUsersChart.update()
-  usersCount.innerText = humValue
-}
-
 const evtSource = new EventSource("https://api.1layar.com/api/v1/watch");
+
+let countHum = 0
+let countTemp = 0
 
 evtSource.onmessage = function(event) {
   const data = JSON.parse(event.data);
@@ -240,18 +239,36 @@ evtSource.onmessage = function(event) {
   console.log(`Current Time: ${formattedDate}`);
   if(data && data.hum) {
     humValue = data.hum;
-    activeUsersChart.data.datasets[0].data.push(humValue);
-    activeUsersChart.data.labels.push(formattedDate);
-    activeUsersChart.update();
+    humChart.data.datasets[0].data.push(humValue);
+    humChart.data.labels.push(formattedDate);
     usersCount.innerText = `${humValue}%`;
+
+    if (countHum > 10) {
+      humChart.data.datasets[0].data.shift();
+      humChart.data.labels.shift();
+
+      countHum -= 1
+    }
+    
+    countHum += 1
+    humChart.update();
   }
 
   if (data && data.temp) {
     temValue = data.temp
-    lineChart.data.datasets[0].data.push(temValue);
-    lineChart.data.labels.push(formattedDate);
-    lineChart.update();
+    tempChart.data.datasets[0].data.push(temValue);
+    tempChart.data.labels.push(formattedDate);
     tempCount.innerText = `${temValue}°C`;
+
+    if (countTemp > 20) {
+      tempChart.data.datasets[0].data.shift();
+      tempChart.data.labels.shift();
+
+      countTemp -= 1
+    }
+    
+    countTemp += 1
+    tempChart.update();
   }
 }
 
