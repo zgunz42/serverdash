@@ -16,7 +16,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
         - name: server
-          image: kangmicin/serverdash:0.0.2
+          image: kangmicin/serverdash:0.0.3
           ports:
             - containerPort: 3000
               name: app-port
